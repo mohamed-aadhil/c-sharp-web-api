@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using CRUD_API.Models;  // Add this namespace to access the Product model
-using System.Collections.Generic;
+using CRUD_API.Models;
+using CRUD_API.Services;
 
 namespace CRUD_API.Controllers
 {
@@ -8,66 +8,42 @@ namespace CRUD_API.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        // Dummy data for demonstration
-        private static List<Product> products = new List<Product>
-        {
-            new Product { Id = 1, Name = "Laptop", Price = 799.99 },
-            new Product { Id = 2, Name = "Smartphone", Price = 599.99 }
-        };
+        private readonly ProductService _productService;
 
-        // GET api/products
+        public ProductController(ProductService productService)
+        {
+            _productService = productService;
+        }
+
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
-        {
-            return Ok(products);
-        }
+        public IActionResult Get() => Ok(_productService.GetAll());
 
-        // GET api/products/{id}
         [HttpGet("{id}")]
-        public ActionResult<Product> Get(int id)
+        public IActionResult Get(int id)
         {
-            var product = products.Find(p => p.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return Ok(product);
+            var product = _productService.GetById(id);
+            return product == null ? NotFound() : Ok(product);
         }
 
-        // POST api/products
         [HttpPost]
-        public ActionResult<Product> Post([FromBody] Product product)
+        public IActionResult Post([FromBody] Product product)
         {
-            product.Id = products.Count + 1;  // Just to give it a new ID
-            products.Add(product);
-            return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+            var newProduct = _productService.Add(product);
+            return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
         }
 
-        // PUT api/products/{id}
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] Product product)
+        public IActionResult Put(int id, [FromBody] Product product)
         {
-            var existingProduct = products.Find(p => p.Id == id);
-            if (existingProduct == null)
-            {
-                return NotFound();
-            }
-            existingProduct.Name = product.Name;
-            existingProduct.Price = product.Price;
-            return NoContent();
+            var result = _productService.Update(id, product);
+            return result ? NoContent() : NotFound();
         }
 
-        // DELETE api/products/{id}
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var product = products.Find(p => p.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            products.Remove(product);
-            return NoContent();
+            var result = _productService.Delete(id);
+            return result ? NoContent() : NotFound();
         }
     }
 }
