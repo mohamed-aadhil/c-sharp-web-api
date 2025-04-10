@@ -1,45 +1,57 @@
-﻿using CRUD_API.Models;
+﻿using CRUD_API.Data;
+using CRUD_API.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace CRUD_API.Services
 {
     public class ProductService
     {
-        private static List<Product> _products = new List<Product>
+        private readonly AppDbContext _context;
+
+        public ProductService(AppDbContext context)
         {
-            new Product { Id = 1, Name = "Laptop", Price = 799.99 },
-            new Product { Id = 2, Name = "Smartphone", Price = 599.99 }
-        };
+            _context = context;
+        }
 
-        public List<Product> GetAll() => _products;
-
-        public Product GetById(int id) =>
-            _products.FirstOrDefault(p => p.Id == id);
-
-        public Product Add(Product product)
+        public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            product.Id = _products.Count > 0 ? _products.Max(p => p.Id) + 1 : 1;
-            _products.Add(product);
+            return await _context.Products.ToListAsync();
+        }
+
+        public async Task<Product> GetByIdAsync(int id)
+        {
+            return await _context.Products.FindAsync(id);
+        }
+
+        public async Task<Product> AddAsync(Product product)
+        {
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
             return product;
         }
 
-        public bool Update(int id, Product updatedProduct)
+        public async Task<bool> UpdateAsync(int id, Product product)
         {
-            var existingProduct = GetById(id);
-            if (existingProduct == null) return false;
+            var existing = await _context.Products.FindAsync(id);
+            if (existing == null)
+                return false;
 
-            existingProduct.Name = updatedProduct.Name;
-            existingProduct.Price = updatedProduct.Price;
+            existing.Name = product.Name;
+            existing.Price = product.Price;
+            await _context.SaveChangesAsync();
             return true;
         }
 
-        public bool Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            var product = GetById(id);
-            if (product == null) return false;
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+                return false;
 
-            _products.Remove(product);
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
             return true;
         }
     }
