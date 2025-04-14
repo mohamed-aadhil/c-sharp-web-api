@@ -2,7 +2,7 @@
 using CRUD_API.Models;
 using CRUD_API.Services;
 
-namespace YourProjectName.Controllers
+namespace CRUD_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -29,8 +29,8 @@ namespace YourProjectName.Controllers
             if (user == null)
                 return Unauthorized("Invalid username or password");
 
-            // JWT will be returned here later
-            return Ok("Login successful — JWT token will be generated next.");
+            var token = _authService.GenerateJwtToken(user);
+            return Ok(new { token });
         }
     }
 }

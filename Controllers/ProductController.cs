@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization; // Required for [Authorize]
+using Microsoft.AspNetCore.Mvc;
 using CRUD_API.Models;
 using CRUD_API.Services;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ namespace CRUD_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Protects all endpoints in this controller
     public class ProductController : ControllerBase
     {
         private readonly ProductService _productService;
