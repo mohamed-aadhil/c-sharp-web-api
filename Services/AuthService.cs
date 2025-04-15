@@ -1,4 +1,5 @@
-﻿using CRUD_API.Data;
+﻿using DotNetEnv;
+using CRUD_API.Data;
 using CRUD_API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +12,7 @@ namespace CRUD_API.Services
     public class AuthService
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration; // ✅ Injected config
+        private readonly IConfiguration _configuration; //  Injected config
 
         public AuthService(AppDbContext context, IConfiguration configuration)
         {
@@ -45,11 +46,10 @@ namespace CRUD_API.Services
             return user;
         }
 
-        // ✅ JWT Token Generation Helper
+        // JWT Token Generation Helper
         public string GenerateJwtToken(User user)
         {
-            var jwtSettings = _configuration.GetSection("Jwt");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET")));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -59,10 +59,10 @@ namespace CRUD_API.Services
             };
 
             var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
+                issuer: Environment.GetEnvironmentVariable("JWT_ISSUER"),
+                audience: Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["ExpiresInMinutes"])),
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(Environment.GetEnvironmentVariable("JWT_EXPIRES_IN_MINUTES"))),
                 signingCredentials: creds
             );
 

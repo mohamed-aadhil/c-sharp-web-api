@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Custom - Local dev secrets
 appsettings.Development.json
+
+# .env file - store secrets
+.env
