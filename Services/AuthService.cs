@@ -46,6 +46,7 @@ namespace CRUD_API.Services
             return user;
         }
 
+
         // JWT Token Generation Helper
         public string GenerateJwtToken(User user)
         {
@@ -57,7 +58,7 @@ namespace CRUD_API.Services
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Role, user.Role)
             };
-
+           
             var token = new JwtSecurityToken(
                 issuer: Environment.GetEnvironmentVariable("JWT_ISSUER"),
                 audience: Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
